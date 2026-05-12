@@ -70,13 +70,8 @@ If not set, all client roles fall back to `ubuntu-svr-01.dperrone.dev`.
 
 | Prompt | Variable | Type | Default | Required |
 |--------|----------|------|---------|----------|
-| Mirror profile | `apt_mirror_server_profile` | Multiple choice (`ubuntu`, `docker_ce`) | `docker_ce` | Yes |
-| Upstream URL | `apt_mirror_server_upstream` | Text | `https://download.docker.com/linux/ubuntu` | Yes |
-| Codenames (JSON list) | `apt_mirror_server_codenames` | Text | `["noble"]` | Yes |
-| Architectures (JSON list) | `apt_mirror_server_architectures` | Text | `["amd64"]` | No |
-| nginx listen directive | `apt_mirror_server_nginx_listen` | Text | `80 default_server` | No |
-| Cron hour | `apt_mirror_server_cron_hour` | Text | `2` | No |
-| Cron minute | `apt_mirror_server_cron_minute` | Text | `30` | No |
+|Server name or pattern | `_hosts` | Text | `ubuntu-svr-01.dperrone.dev` | Yes |
+| Mirror Origin | `docker_ce_apt_mirror_origin` | Text | `http://ubuntu-svr-01.dperrone.dev` | Yes |
 | Run initial sync now? | `apt_mirror_server_run_initial_sync` | Multiple choice (`true`, `false`) | `false` | Yes |
 
 ### 2. Configure Client Mirrors
@@ -92,12 +87,9 @@ If not set, all client roles fall back to `ubuntu-svr-01.dperrone.dev`.
 
 | Prompt | Variable | Type | Default | Required |
 |--------|----------|------|---------|----------|
-| Mirror server hostname | `mirror_server_hostname` | Text | `ubuntu-svr-01.dperrone.dev` | Yes |
-| Client profiles (JSON list) | `client_mirror_profiles` | Text | `["docker_ce"]` | Yes |
-| Docker codename | `config_client_docker_mirror_codename` | Text | `noble` | No |
-| Docker channel | `config_client_docker_mirror_channel` | Text | `stable` | No |
-| Remove external sources? | `config_client_external_sources_enabled` | Multiple choice (`true`, `false`) | `false` | No |
-| Disable sources.list? | `config_client_external_sources_disable_sources_list` | Multiple choice (`true`, `false`) | `true` | No |
+| Server name or pattern | `_hosts` | text | `ubuntu-svr-01.dperrone.dev` | Yes |
+| Disable sources.list? | `config_client_external_sources_enabled` | Multiple choice (`true`, `false`) | `false` | No |
+| Choose client mirror profile | `apt_mirror_server_profile` | Multiple choice (`ubuntu`, `docker_ce`) | `docker_ce` | Yes |
 
 ---
 
@@ -117,36 +109,11 @@ When running as a workflow, each job template should have its **survey disabled*
 
 | Prompt | Variable | Type | Default | Required |
 |--------|----------|------|---------|----------|
-| Mirror server hostname | `mirror_server_hostname` | Text | `ubuntu-svr-01.dperrone.dev` | Yes |
-| Mirror profile | `apt_mirror_server_profile` | Multiple choice (`ubuntu`, `docker_ce`) | `docker_ce` | Yes |
-| Upstream URL | `apt_mirror_server_upstream` | Text | `https://download.docker.com/linux/ubuntu` | Yes |
-| Codenames (JSON list) | `apt_mirror_server_codenames` | Text | `["noble"]` | Yes |
+| Choose client mirror profile | `apt_mirror_server_profile` | Multiple choice (`ubuntu`, `docker_ce`) | `docker_ce` | Yes |
+| Disable sources.list? | `config_client_external_sources_enabled` | Multiple choice (`true`, `false`) | `false` | No |
 | Run initial sync now? | `apt_mirror_server_run_initial_sync` | Multiple choice (`true`, `false`) | `false` | Yes |
-| Client profiles (JSON list) | `client_mirror_profiles` | Text | `["docker_ce"]` | Yes |
-| Remove external sources? | `config_client_external_sources_enabled` | Multiple choice (`true`, `false`) | `false` | No |
 
 > **Tip:** When using the workflow, variables from the workflow survey are passed to all nodes. Node-specific overrides (e.g. different inventories) are configured on each workflow node, not in the survey.
-
-#### Standalone vs Workflow survey differences
-
-| Variable | Standalone: Setup Mirror Server | Standalone: Configure Client Mirrors | Workflow |
-|----------|:---:|:---:|:---:|
-| `mirror_server_hostname` | - | Yes | Yes |
-| `apt_mirror_server_profile` | Yes | - | Yes |
-| `apt_mirror_server_upstream` | Yes | - | Yes |
-| `apt_mirror_server_codenames` | Yes | - | Yes |
-| `apt_mirror_server_architectures` | Yes | - | - |
-| `apt_mirror_server_nginx_listen` | Yes | - | - |
-| `apt_mirror_server_cron_hour` | Yes | - | - |
-| `apt_mirror_server_cron_minute` | Yes | - | - |
-| `apt_mirror_server_run_initial_sync` | Yes | - | Yes |
-| `client_mirror_profiles` | - | Yes | Yes |
-| `config_client_docker_mirror_codename` | - | Yes | - |
-| `config_client_docker_mirror_channel` | - | Yes | - |
-| `config_client_external_sources_enabled` | - | Yes | Yes |
-| `config_client_external_sources_disable_sources_list` | - | Yes | - |
-
-Variables marked `-` in a column are either not relevant to that template or left at role defaults (can be added to the survey if needed).
 
 ---
 
