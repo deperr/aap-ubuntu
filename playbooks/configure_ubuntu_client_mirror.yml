@@ -1,0 +1,9 @@
+---
+
+- name: Configure Ubuntu apt mirror
+  hosts: "{{ _hosts | default(omit) }}"
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: config_client_ubuntu_mirror

@@ -1,0 +1,15 @@
+---
+
+# Base URL of your mirror host (no trailing slash). Override via extra-vars or survey.
+config_client_docker_mirror_origin: "http://{{ mirror_server_hostname | default('ubuntu-svr-01.dperrone.dev') }}"
+
+# Path nginx serves for the Docker mirror (must match ubuntu_mirror_server URL path).
+config_client_docker_mirror_path: "/linux/ubuntu"
+
+config_client_docker_mirror_codename: noble
+config_client_docker_mirror_channel: stable
+config_client_docker_mirror_arch: amd64
+
+# Official Docker archive signing key (fetched once onto the client).
+config_client_docker_mirror_key_url: https://download.docker.com/linux/ubuntu/gpg
+config_client_docker_mirror_signed_by: /etc/apt/keyrings/docker.asc

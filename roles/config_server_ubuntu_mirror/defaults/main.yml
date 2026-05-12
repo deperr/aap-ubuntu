@@ -1,0 +1,46 @@
+---
+
+# ubuntu      — mirror Ubuntu archive (large). Typical upstream: http://archive.ubuntu.com/ubuntu
+# docker_ce   — mirror Docker CE apt repo only (small POC). Set upstream to Docker’s base URL below.
+apt_mirror_server_profile: docker_ce
+
+# Upstream base URL for apt-mirror (must match the deb line base path).
+# Ubuntu example: http://archive.ubuntu.com/ubuntu
+# Docker POC example: https://download.docker.com/linux/ubuntu
+# apt_mirror_server_upstream: "http://archive.ubuntu.com/ubuntu"
+apt_mirror_server_upstream: "https://download.docker.com/linux/ubuntu"
+
+# If empty, the hostname is taken from apt_mirror_server_upstream for apt-mirror paths and nginx.
+# Set explicitly when the URL uses a non-default port or you need to override the stored tree name.
+apt_mirror_server_upstream_hostname: ""
+
+# Local spool layout (apt-mirror stores under mirror/<hostname>/ubuntu).
+apt_mirror_server_base_path: /var/spool/apt-mirror
+
+# Ubuntu release codenames to mirror (each gets updates, backports, security pockets).
+# Full mirrors are very large (multi‑TB); keep this minimal for lab use.
+apt_mirror_server_codenames:
+  - noble
+
+apt_mirror_server_components: main restricted universe multiverse
+
+# docker_ce profile only (suite is e.g. noble; component is Docker’s channel).
+apt_mirror_server_docker_channel: stable
+
+# Architectures to mirror (each adds significant disk usage).
+apt_mirror_server_architectures:
+  - amd64
+
+# apt-mirror toggles (see /usr/share/doc/apt-mirror/examples).
+apt_mirror_server_run_postmirror: 0
+
+# nginx
+apt_mirror_server_nginx_listen: "80 default_server"
+apt_mirror_server_nginx_server_name: "_"
+
+# Cron schedule for incremental sync (mirror grows over time).
+apt_mirror_server_cron_hour: "2"
+apt_mirror_server_cron_minute: "30"
+
+# Run a full apt-mirror sync at the end of the play (can take hours to days).
+apt_mirror_server_run_initial_sync: false

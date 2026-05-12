@@ -1,0 +1,7 @@
+---
+
+- name: Reload NGINX server
+  changed_when: false
+  ansible.builtin.shell: nginx -t && systemctl reload nginx
+  args:
+    executable: /bin/bash

@@ -1,0 +1,9 @@
+---
+
+# Only source files containing this origin are kept. Everything else in
+# /etc/apt/sources.list.d/ is removed. Matched against file contents.
+config_client_external_sources_allowed_origin: "{{ mirror_server_hostname | default('ubuntu-svr-01.dperrone.dev') }}"
+
+# Also blank /etc/apt/sources.list (Ubuntu default OS sources).
+# Set to false if you still want the OS to reach archive.ubuntu.com.
+config_client_external_sources_disable_sources_list: true

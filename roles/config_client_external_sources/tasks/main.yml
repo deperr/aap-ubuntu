@@ -1,0 +1,50 @@
+---
+
+- name: Fail when not Ubuntu
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == "Ubuntu"
+    fail_msg: "Role to remove external sources only supports Ubuntu but (got {{ ansible_distribution }})."
+
+- name: Discover all files in sources.list.d
+  register: config_client_external_sources__found
+  ansible.builtin.find:
+    paths: /etc/apt/sources.list.d
+    file_type: file
+
+- name: Read contents of each source file
+  loop: "{{ config_client_external_sources__found.files | map(attribute='path') | list }}"
+  register: config_client_external_sources__contents
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+
+- name: Remove source files not referencing allowed origin
+  loop: "{{ config_client_external_sources__contents.results }}"
+  loop_control:
+    label: "{{ item.source }}"
+  when: config_client_external_sources_allowed_origin not in (item.content | b64decode)
+  notify: Update APT package cache
+  ansible.builtin.file:
+    path: "{{ item.source }}"
+    state: absent
+
+- name: Check if /etc/apt/sources.list references allowed origin
+  when: config_client_external_sources_disable_sources_list | bool
+  register: config_client_external_sources__main_sources
+  ansible.builtin.slurp:
+    src: /etc/apt/sources.list
+
+- name: Disable /etc/apt/sources.list if it does not reference allowed origin
+  when:
+    - config_client_external_sources_disable_sources_list | bool
+    - config_client_external_sources_allowed_origin not in
+      (config_client_external_sources__main_sources.content | b64decode)
+  notify: Update APT package cache
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list
+    content: |
+      # Managed by AAP. All sources locked to internal mirrors only
+    owner: root
+    group: root
+    mode: "0644"
+    backup: true

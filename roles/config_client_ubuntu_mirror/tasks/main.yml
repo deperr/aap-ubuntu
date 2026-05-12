@@ -1,0 +1,46 @@
+---
+
+- name: Fail when not Ubuntu
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == "Ubuntu"
+    fail_msg: "Role config_client_ubuntu_mirror supports Ubuntu only (got {{ ansible_distribution }})."
+
+- name: Check for deb822 ubuntu.sources
+  register: config_client_ubuntu_mirror__deb822_exists
+  ansible.builtin.stat:
+    path: /etc/apt/sources.list.d/ubuntu.sources
+
+- name: Configure apt mirror (deb822 ubuntu.sources)
+  when: config_client_ubuntu_mirror__deb822_exists.stat.exists
+  notify: Update APT package cache
+  ansible.builtin.template:
+    src: ubuntu.sources.j2
+    dest: /etc/apt/sources.list.d/ubuntu.sources
+    owner: root
+    group: root
+    mode: "0644"
+    backup: true
+
+- name: Disable duplicate entries in sources.list when using deb822
+  when: config_client_ubuntu_mirror__deb822_exists.stat.exists
+  notify: Update APT package cache
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list
+    content: |
+      # Managed by AAP — suite definitions in /etc/apt/sources.list.d/ubuntu.sources
+    owner: root
+    group: root
+    mode: "0644"
+    backup: true
+
+- name: Configure apt mirror (classic sources.list)
+  when: not config_client_ubuntu_mirror__deb822_exists.stat.exists
+  notify: Update APT package cache
+  ansible.builtin.template:
+    src: sources.list.j2
+    dest: /etc/apt/sources.list
+    owner: root
+    group: root
+    mode: "0644"
+    backup: true

@@ -1,0 +1,13 @@
+---
+# Base URL of your mirror (paths must match archive.ubuntu.com/ubuntu layout). Override via extra-vars or survey.
+config_client_ubuntu_mirror_base_url: "http://{{ mirror_server_hostname | default('ubuntu-svr-01.dperrone.dev') }}/ubuntu"
+
+# Space-separated suite names (adjust if your mirror only publishes a subset).
+config_client_ubuntu_mirror_suites: >-
+  {{ ansible_distribution_release }}
+  {{ ansible_distribution_release }}-updates
+  {{ ansible_distribution_release }}-backports
+  {{ ansible_distribution_release }}-security
+
+# Used in deb822 templates (Ubiquity/ubuntu-keyring package).
+config_client_ubuntu_mirror_signed_by: /usr/share/keyrings/ubuntu-archive-keyring.gpg

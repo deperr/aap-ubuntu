@@ -1,0 +1,16 @@
+---
+
+- name: Configure client apt mirrors
+  hosts: "{{ _hosts | default(omit) }}"
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: config_client_ubuntu_mirror
+      when: "'ubuntu' in client_mirror_profiles"
+
+    - role: config_client_docker_mirror
+      when: "'docker_ce' in client_mirror_profiles"
+
+    - role: config_client_external_sources
+      when: config_client_external_sources_enabled | default(false) | bool

@@ -1,0 +1,38 @@
+---
+
+- name: Fail when not Ubuntu
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == "Ubuntu"
+    fail_msg: "Role to configure Docker repository only supports Ubuntu but (got {{ ansible_distribution }})."
+
+- name: Install CA certificates for HTTPS key download
+  ansible.builtin.apt:
+    name: ca-certificates
+    state: present
+    update_cache: true
+
+- name: Ensure keyrings directory exists
+  ansible.builtin.file:
+    path: "{{ config_client_docker_mirror_signed_by | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Download Docker apt signing key
+  ansible.builtin.get_url:
+    url: "{{ config_client_docker_mirror_key_url }}"
+    dest: "{{ config_client_docker_mirror_signed_by }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configure Docker CE apt source pointing at internal mirror
+  notify: Update APT package cache
+  ansible.builtin.template:
+    src: docker-ce.list.j2
+    dest: /etc/apt/sources.list.d/docker-ce-mirror.list
+    owner: root
+    group: root
+    mode: "0644"

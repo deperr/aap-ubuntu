@@ -1,0 +1,16 @@
+# {{ ansible_managed }}
+server {
+    listen {{ apt_mirror_server_nginx_listen }};
+    server_name {{ apt_mirror_server_nginx_server_name }};
+
+    root /var/www/html;
+
+    location {{ apt_mirror_server__url_path }}/ {
+        alias {{ apt_mirror_server_base_path }}/mirror/{{ apt_mirror_server__upstream_hostname }}{{ apt_mirror_server__url_path }}/;
+        autoindex off;
+    }
+
+    location = {{ apt_mirror_server__url_path }} {
+        return 301 {{ apt_mirror_server__url_path }}/;
+    }
+}

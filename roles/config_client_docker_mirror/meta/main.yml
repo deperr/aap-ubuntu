@@ -1,0 +1,17 @@
+---
+
+galaxy_info:
+  author: aap-ubuntu
+  description: Point Ubuntu apt at an internal Docker CE mirror (with Docker signing key).
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - jammy
+        - noble
+  galaxy_tags:
+    - apt
+    - docker
+
+dependencies: []

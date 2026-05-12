@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  author: aap-ubuntu
+  description: Sync an Ubuntu archive with apt-mirror and serve it over nginx.
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - jammy
+        - noble
+  galaxy_tags:
+    - apt
+    - mirror
+    - nginx
+    - ubuntu
+
+dependencies: []

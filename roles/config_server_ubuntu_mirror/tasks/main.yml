@@ -1,0 +1,93 @@
+---
+
+- name: Fail when not Ubuntu
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == "Ubuntu"
+    fail_msg: "Role configured Ubuntu Server as mirror and only supports Ubuntu (got {{ ansible_distribution }})."
+
+- name: Validate mirror profile
+  ansible.builtin.assert:
+    that:
+      - apt_mirror_server_profile in ['ubuntu', 'docker_ce']
+    fail_msg: "apt_mirror_server_profile must be ubuntu or docker_ce (got {{ apt_mirror_server_profile }})."
+
+- name: Resolve upstream hostname for mirror tree and nginx alias
+  ansible.builtin.set_fact:
+    apt_mirror_server__upstream_hostname: "{{ (apt_mirror_server_upstream_hostname | default('', true) | trim | length > 0) | ternary(apt_mirror_server_upstream_hostname | trim, apt_mirror_server_upstream | regex_replace('^https?://([^/]+).*$', '\\1')) }}"
+
+- name: Derive URL path on upstream (nginx location matches apt-mirror storage layout)
+  ansible.builtin.set_fact:
+    apt_mirror_server__url_path: "{{ apt_mirror_server_upstream | regex_replace('^https?://[^/]+', '') }}"
+
+- name: Validate upstream URL includes a repository path
+  ansible.builtin.assert:
+    that:
+      - apt_mirror_server__url_path | length > 0
+      - apt_mirror_server__url_path | regex_search('^/')
+    fail_msg: "apt_mirror_server_upstream must include a path after the host (e.g. https://download.docker.com/linux/ubuntu)."
+
+- name: Install apt-mirror and nginx
+  ansible.builtin.apt:
+    name:
+      - apt-mirror
+      - nginx
+    state: present
+    update_cache: true
+
+- name: Ensure cron log directory exists
+  ansible.builtin.file:
+    path: /var/log/apt-mirror
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy apt-mirror configuration
+  ansible.builtin.template:
+    src: mirror.list.j2
+    dest: /etc/apt/mirror.list
+    owner: root
+    group: root
+    mode: "0644"
+    backup: true
+
+- name: Deploy nginx site for mirror content
+  notify: Reload NGINX server
+  ansible.builtin.template:
+    src: nginx-apt-mirror.conf.j2
+    dest: /etc/nginx/sites-available/apt-mirror.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Disable default nginx site
+  notify: Reload NGINX server
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Enable apt-mirror nginx site
+  notify: Reload NGINX server
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/apt-mirror.conf
+    dest: /etc/nginx/sites-enabled/apt-mirror.conf
+    state: link
+    force: true
+
+- name: Apply nginx configuration before optional sync
+  ansible.builtin.meta: flush_handlers
+
+- name: Schedule periodic apt-mirror sync
+  ansible.builtin.cron:
+    name: ubuntu apt-mirror sync
+    minute: "{{ apt_mirror_server_cron_minute }}"
+    hour: "{{ apt_mirror_server_cron_hour }}"
+    job: "/usr/bin/apt-mirror >> /var/log/apt-mirror/cron.log 2>&1"
+    user: root
+
+- name: Run initial apt-mirror sync (long-running)
+  when: apt_mirror_server_run_initial_sync | bool
+  register: ubuntu_mirror_server__initial_sync
+  changed_when: ubuntu_mirror_server__initial_sync.rc == 0
+  ansible.builtin.command: /usr/bin/apt-mirror

@@ -1,0 +1,5 @@
+# {{ ansible_managed }}
+
+{% for suite in config_client_ubuntu_mirror_suites.split() %}
+deb {{ config_client_ubuntu_mirror_base_url }} {{ suite }} main restricted universe multiverse
+{% endfor %}

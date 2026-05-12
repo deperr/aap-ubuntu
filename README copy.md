@@ -1,4 +1,4 @@
-# Managing Ubuntu with Ansible Automation Platform
+# aap-ubuntu
 
 Create local apt repositories and configure Ubuntu hosts to pull packages from an internal mirror server. Designed for Ansible Automation Platform (AAP) 2.6.
 

@@ -1,0 +1,7 @@
+# {{ ansible_managed }}
+
+Types: deb
+URIs: {{ config_client_ubuntu_mirror_base_url }}
+Suites: {{ config_client_ubuntu_mirror_suites }}
+Components: main restricted universe multiverse
+Signed-By: {{ config_client_ubuntu_mirror_signed_by }}

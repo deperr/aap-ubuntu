@@ -1,0 +1,28 @@
+# {{ ansible_managed }}
+############# config ##################
+set base_path         {{ apt_mirror_server_base_path }}
+set mirror_path       $base_path/mirror
+set skel_path         $base_path/skel
+set var_path          $base_path/var
+set cleanscript       $var_path/clean.sh
+set defaultarch       {{ apt_mirror_server_architectures[0] }}
+set postmirror_script $var_path/postmirror.sh
+set run_postmirror    {{ apt_mirror_server_run_postmirror }}
+############# end config ##############
+{% if apt_mirror_server_profile == 'docker_ce' %}
+{% for cn in apt_mirror_server_codenames %}
+{% for arch in apt_mirror_server_architectures %}
+deb-{{ arch }} {{ apt_mirror_server_upstream }} {{ cn }} {{ apt_mirror_server_docker_channel }}
+{% endfor %}
+{% endfor %}
+clean {{ apt_mirror_server_upstream }}
+{% else %}
+{% for cn in apt_mirror_server_codenames %}
+{% for suite in [cn, cn ~ '-updates', cn ~ '-backports', cn ~ '-security'] %}
+{% for arch in apt_mirror_server_architectures %}
+deb-{{ arch }} {{ apt_mirror_server_upstream }} {{ suite }} {{ apt_mirror_server_components }}
+{% endfor %}
+{% endfor %}
+{% endfor %}
+clean {{ apt_mirror_server_upstream }}
+{% endif %}
