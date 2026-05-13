@@ -44,3 +44,8 @@ apt_mirror_server_cron_minute: "30"
 
 # Run a full apt-mirror sync at the end of the play (can take hours to days).
 apt_mirror_server_run_initial_sync: false
+
+# Create a portable tarball of the mirrored packages for offline export.
+apt_mirror_server_create_export_tarball: false
+apt_mirror_server_export_path: /var/spool/apt-mirror/export
+apt_mirror_server_export_format: gz

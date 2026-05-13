@@ -91,3 +91,34 @@
   register: ubuntu_mirror_server__initial_sync
   changed_when: ubuntu_mirror_server__initial_sync.rc == 0
   ansible.builtin.command: /usr/bin/apt-mirror
+
+# Export tarball of mirrored packages
+- name: Ensure export directory exists
+  when: apt_mirror_server_create_export_tarball | bool
+  ansible.builtin.file:
+    path: "{{ apt_mirror_server_export_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Build export tarball filename
+  when: apt_mirror_server_create_export_tarball | bool
+  vars:
+    _base: "{{ apt_mirror_server_export_path }}"
+    _name: "apt-mirror-{{ apt_mirror_server_profile }}-{{ ansible_date_time.date }}"
+  ansible.builtin.set_fact:
+    apt_mirror_server__export_file: "{{ _base }}/{{ _name }}.tar.{{ apt_mirror_server_export_format }}"
+
+- name: Create exportable tarball of mirrored packages
+  when: apt_mirror_server_create_export_tarball | bool
+  community.general.archive:
+    path: "{{ apt_mirror_server_base_path }}/mirror/"
+    dest: "{{ apt_mirror_server__export_file }}"
+    format: "{{ apt_mirror_server_export_format }}"
+    mode: "0644"
+
+- name: Display export tarball location
+  when: apt_mirror_server_create_export_tarball | bool
+  ansible.builtin.debug:
+    msg: "Mirror export tarball created at {{ apt_mirror_server__export_file }}"
